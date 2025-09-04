@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  /* themes: nord --default; */
+  themes: light --default, dark --prefersdark;
+  /* themes: cmyk --default, dracula --prefersdark; */
+  /* themes: abyss; */
+  /* themes: cupcake --defaul; */
+  /* themes: dracula --defaul; */
+}
+
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.page-transition {
+	transition: opacity 0.2s ease-in-out;
+}
