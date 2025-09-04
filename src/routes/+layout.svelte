@@ -4,6 +4,16 @@
   import { token, user } from '$lib/stores/auth.js';
   import { goto } from '$app/navigation';
   import { protectedRoutes, roleBasedRoutes, authRoutes } from '$lib/constants/routes.js';
+  import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+  import { browser } from '$app/environment';
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: browser,
+      },
+    },
+  })
 
   let { children } = $props()
 
@@ -35,5 +45,7 @@
   });
 </script>
 
-{@render children()}
+<QueryClientProvider client={queryClient}>
+  {@render children()}
+</QueryClientProvider>
 
