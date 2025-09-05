@@ -1,5 +1,10 @@
 export interface ProductType {
-  id: number;
+  id?: string;
   name: string;
-  email: string;
+  description: string;
+  price: number | null;
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }

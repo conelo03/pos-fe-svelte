@@ -1,14 +1,24 @@
 import { stringify } from "query-string";
 import apiClient from "./apiClient.js";
-
-export const getPosts = async (limit: number) => {
-  const response = await fetch("https://jsonplaceholder.typicode.com/posts");
-  const data = (await response.json()) as Array<any>;
-  return data.filter((x) => x.id <= limit);
-};
+import type { ProductType } from "$lib/types/product.type.js";
 
 export const getProduts = async (params: any): Promise<any> => {
   const res = await apiClient.get(`/products?${stringify(params)}`);
+  return res.data;
+};
+
+export const getProduct = async (id: string): Promise<any> => {
+  const res = await apiClient.get(`/products/${id}`);
+  return res.data;
+};
+
+export const createProduct = async (body: ProductType): Promise<any> => {
+  const res = await apiClient.post(`/products`, { ...body });
+  return res.data;
+};
+
+export const updateProduct = async (body: ProductType): Promise<any> => {
+  const res = await apiClient.put(`/products/${body.id}`, { ...body });
   return res.data;
 };
 
