@@ -1,7 +1,10 @@
 <script lang="ts" >
+  import CustomSelect from '$lib/components/dataDisplay/CustomSelect.svelte';
+  import { roles } from '$lib/constants/options.js';
   import type { UserType } from '$lib/types/user.type.js';
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
+  import Select from 'svelte-select';
   import * as yup from 'yup';
 
   let { 
@@ -48,16 +51,19 @@
     })
   }
  
-  const { form, errors } = createForm<yup.InferType<typeof schema>>({
-    initialValues: { ...defaultValues },
+  const { form, data, setData, errors } = createForm<yup.InferType<typeof schema>>({
+    initialValues: { 
+      ...defaultValues
+    },
     onSubmit: (values: UserType) => {
-      onSubmit(values)
+      console.log(values)
+      // onSubmit(values)
     },
     extend: [validator({ schema })],
   })
 </script>
 
-<form use:form class="space-y-4">
+<form use:form class="space-y-2">
   <input type="hidden" name="id" />
   <fieldset class="fieldset">
     <legend class="fieldset-legend">Name</legend>
@@ -88,7 +94,18 @@
   {/if}
   <fieldset class="fieldset">
     <legend class="fieldset-legend">Role</legend>
-    <input type="text" name="role" class="input w-full" placeholder="Role" />
+    <CustomSelect
+      items={roles}
+      value={$data.role} 
+      placeholder={'Select Role'}
+      onchange={(e: string | any[]) => setData('role', e)}
+    />
+    <!-- <select class="select w-full" name="role">
+      <option disabled selected>Select Role</option>
+      <option value="admin">Admin</option>
+      <option value="customer">Customer</option>
+      <option value="currier">Currier</option>
+    </select> -->
     {#if $errors.role}<span class="text-error">{$errors.role}</span>{/if}
   </fieldset>
   <div class="flex justify-end gap-2">

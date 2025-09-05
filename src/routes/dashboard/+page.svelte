@@ -20,14 +20,14 @@
 		<p class="text-base-content/60 max-w-md mx-auto mb-6">
 			Your SvelteKit admin template with DaisyUI v5 is ready! The main content area is empty and waiting for your components.
 		</p>
-		<button class="btn btn-primary">
+		<!-- <button class="btn btn-primary">
 			<i class="fas fa-plus mr-2"></i>
 			Get Started
-		</button>
+		</button> -->
 	</div>
 	
 	<!-- Stats Preview -->
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+	<!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 		<div class="stat bg-base-100 shadow rounded-lg">
 			<div class="stat-figure text-primary">
 				<i class="fas fa-users text-2xl"></i>
@@ -63,5 +63,5 @@
 			<div class="stat-value text-info">18%</div>
 			<div class="stat-desc">↗︎ 3% increase</div>
 		</div>
-	</div>
+	</div> -->
 </div>
