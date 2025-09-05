@@ -21,7 +21,6 @@
   const { form, errors } = createForm<yup.InferType<typeof schema>>({
     initialValues: { ...defaultValues },
     onSubmit: (values: ProductType) => {
-      console.log(values)
       onSubmit(values)
       // ...
     },

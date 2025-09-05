@@ -4,7 +4,6 @@
   import type { UserType } from '$lib/types/user.type.js';
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
-  import Select from 'svelte-select';
   import * as yup from 'yup';
 
   let { 
@@ -56,8 +55,7 @@
       ...defaultValues
     },
     onSubmit: (values: UserType) => {
-      console.log(values)
-      // onSubmit(values)
+      onSubmit(values)
     },
     extend: [validator({ schema })],
   })
