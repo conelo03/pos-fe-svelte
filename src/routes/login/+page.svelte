@@ -1,50 +1,56 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-	import { token, user } from '$lib/stores/auth.js'
-	import { themeController } from '$lib/stores/theme.js'
-	import { onMount } from 'svelte'
-	import Toast from '$lib/components/ui/Toast.svelte'
-  import { apiPost } from '$lib/api.js'
+	import { goto } from '$app/navigation';
+	import { token, user } from '$lib/stores/auth.js';
+	import { themeController } from '$lib/stores/theme.js';
+	import { onMount } from 'svelte';
+	import Toast from '$lib/components/ui/Toast.svelte';
+  import { validator } from '@felte/validator-yup';
+  import { createForm } from 'felte';
+  import { login } from '$lib/services/auth.service.js';
+  import { createMutation } from '@tanstack/svelte-query';
+  import * as yup from 'yup';
 	
-	let loading = false;
-	let showToast = false;
-	let toastMessage = '';
-	let toastType = 'info';
+	let showToast = $state(false)
+	let toastMessage = $state('')
+	let toastType = $state('info')
 	
 	onMount(() => {
-		themeController.init();
-	});
-	
-	async function handleSubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement}) {
-		event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(data.entries());
-		loading = true;
-		
-		try {
-			const response: any = await apiPost('/auth/login', payload);
-			
-			if (response.token) {
-        token.set(response.token);
-        user.set(response.user);
-				toastMessage = response.message;
-				toastType = 'success';
-				showToast = true;
-        
-        setTimeout(() => goto('/dashboard'), 1000);
-			} else {
-				toastMessage = response.error || 'Login failed';
-				toastType = 'error';
-				showToast = true;
-			}
-		} catch (error) {
-			toastMessage = 'An error occurred';
-			toastType = 'error';
+		themeController.init()
+	})
+
+  const schema = yup.object({
+    username: yup.string().required(),
+		password: yup.string().required("Password is required"),
+  })
+
+	const loginMutation = createMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+			token.set(data.token);
+			user.set(data.user);
+			toastMessage = data.message;
+			toastType = 'success';
 			showToast = true;
-		} finally {
-			loading = false;
-		}
-	}
+			
+			setTimeout(() => goto('/dashboard'), 1000);
+		},
+    onError: (error: any) => {
+			toastMessage = error?.response?.data?.message ?? 'Login failed'
+			toastType = 'error'
+			showToast = true
+		},
+  })
+ 
+  const { form, errors } = createForm<yup.InferType<typeof schema>>({
+    initialValues: {
+			username: '',
+			password: '',
+		},
+    onSubmit: (values: any) => {
+			$loginMutation.mutate(values)
+    },
+    extend: [validator({ schema })],
+  })
 	
 	function closeToast() {
 		showToast = false;
@@ -66,49 +72,19 @@
 				<p class="text-base-content/60">Sign in to your admin account</p>
 			</div>
 			
-			<form on:submit={handleSubmit} class="space-y-4">
-				<div class="form-control">
-					<label class="label" for="username">
-						<span class="label-text">Username</span>
-					</label>
-					<input 
-						id="username"
-						type="text" 
-            name="username"
-						class="input input-bordered w-full" 
-						placeholder="admin@example.com" 
-						required
-						disabled={loading}
-					/>
-				</div>
-				
-				<div class="form-control">
-					<label class="label" for="password">
-						<span class="label-text">Password</span>
-					</label>
-					<input 
-						id="password"
-						type="password" 
-            name="password"
-						class="input input-bordered w-full" 
-						placeholder="••••••••" 
-						required
-						disabled={loading}
-					/>
-					<!-- <label class="label"> -->
-          <!-- <a href="#" class="label-text-alt link link-hover">Forgot password?</a> -->
-					<!-- </label> -->
-				</div>
-				
-				<div class="form-control">
-					<label class="label cursor-pointer">
-						<span class="label-text">Remember me</span>
-						<input type="checkbox" name="rememberMe" class="checkbox checkbox-primary" disabled={loading} />
-					</label>
-				</div>
-				
-				<button type="submit" class="btn btn-primary w-full" disabled={loading}>
-					{#if loading}
+			<form use:form class="space-y-4">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Username</legend>
+					<input type="text" name="username" class="input w-full" placeholder="Username" />
+					{#if $errors.username}<span class="text-error">{$errors.username}</span>{/if}
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Password</legend>
+					<input type="password" name="password" class="input w-full" placeholder="Password" />
+					{#if $errors.password}<span class="text-error">{$errors.password}</span>{/if}
+				</fieldset>				
+				<button type="submit" class="btn btn-primary w-full" disabled={$loginMutation.isPending}>
+					{#if $loginMutation.isPending}
 						<span class="loading loading-spinner loading-sm"></span>
 						Signing in...
 					{:else}

@@ -2,61 +2,71 @@
 	import { themeController } from '$lib/stores/theme.js';
 	import { onMount } from 'svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
+  import { goto } from '$app/navigation';
+  import { apiPost } from '$lib/api.js';
+  import type { UserType } from '$lib/types/user.type.js';
+  import { validator } from '@felte/validator-yup';
+  import { createForm } from 'felte';
+  import * as yup from 'yup';
+  import { createMutation } from '@tanstack/svelte-query';
+  import { register } from '$lib/services/auth.service.js';
 	
-	let loading = false;
-	let showToast = false;
-	let toastMessage = '';
-	let toastType = 'info';
+	let showToast = $state(false)
+	let toastMessage = $state('')
+	let toastType = $state('info')
 	
 	onMount(() => {
-		themeController.init();
-	});
-	
-	async function handleRegister(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement}) {
-		event.preventDefault();
-		
-		// if (!agreeTerms) {
-		// 	toastMessage = 'Please agree to the terms and conditions';
-		// 	toastType = 'warning';
-		// 	showToast = true;
-		// 	return;
-		// }
-		
-		// loading = true;
-		
-		// try {
-		// 	const result = await auth.register({
-		// 		firstName,
-		// 		lastName,
-		// 		email,
-		// 		password,
-		// 		confirmPassword
-		// 	});
+		themeController.init()
+	})
+
+  const schema = yup.object({
+		name: yup.string().required(),
+    username: yup.string().required(),
+    role: yup.string().required(),
+		email: yup.string().email('Invalid Email').required("Email is required"),
+		password: yup.string().required("Password is required"),
+		passwordConfirm: yup.string()
+			.when(["password"], {
+				is: (password: string) => password,
+				then: (schema) => schema.required("Confirm password required")
+					.oneOf([yup.ref("password")], "Passwords must match"),
+				otherwise: (schema) => schema.notRequired()
+			}),
+  })
+
+	const registerMutation = createMutation({
+    mutationFn: register,
+    onSuccess: (data) => {
+			toastMessage = data?.message
+			toastType = 'success'
+			showToast = true
 			
-		// 	if (result.success) {
-		// 		toastMessage = result.message;
-		// 		toastType = 'success';
-		// 		showToast = true;
-				
-		// 		setTimeout(() => {
-		// 			goto('/login');
-		// 		}, 2000);
-		// 	} else {
-		// 		toastMessage = result.error;
-		// 		toastType = 'error';
-		// 		showToast = true;
-		// 	}
-		// } catch (error) {
-		// 	toastMessage = 'Registration failed';
-		// 	toastType = 'error';
-		// 	showToast = true;
-		// } finally {
-		// 	loading = false;
-		// }
-	}
+			setTimeout(() => goto('/login'), 1000)
+		},
+    onError: (error: any) => {
+			toastMessage = error?.response?.data?.message ?? 'An error occurred'
+			toastType = 'error'
+			showToast = true
+		},
+  })
+ 
+  const { form, errors } = createForm<yup.InferType<typeof schema>>({
+    initialValues: {
+			name: '',
+			username: '',
+			email: '',
+			password: '',
+			passwordConfirm: '',
+			role: 'customer',
+		},
+    onSubmit: (values: UserType) => {
+			$registerMutation.mutate(values)
+    },
+    extend: [validator({ schema })],
+  })
 	
 	function closeToast() {
-		showToast = false;
+		showToast = false
 	}
 </script>
 
@@ -75,95 +85,34 @@
 				<p class="text-base-content/60">Join the admin panel</p>
 			</div>
 			
-			<form on:submit={handleRegister} class="space-y-4">
-				<div class="grid grid-cols-2 gap-4">
-					<div class="form-control">
-						<label class="label" for="firstName">
-							<span class="label-text">First Name</span>
-						</label>
-						<input 
-							id="firstName"
-							name="firstName"
-							type="text" 
-							class="input input-bordered w-full" 
-							placeholder="John" 
-							required
-							disabled={loading}
-						/>
-					</div>
-					<div class="form-control">
-						<label class="label" for="lastName">
-							<span class="label-text">Last Name</span>
-						</label>
-						<input 
-							id="lastName"
-							name="lastName"
-							type="text" 
-							class="input input-bordered w-full" 
-							placeholder="Doe" 
-							required
-							disabled={loading}
-						/>
-					</div>
-				</div>
-				
-				<div class="form-control">
-					<label class="label" for="registerEmail">
-						<span class="label-text">Email Address</span>
-					</label>
-					<input 
-						id="registerEmail"
-						type="email" 
-						name="email" 
-						class="input input-bordered w-full" 
-						placeholder="admin@example.com" 
-						required
-						disabled={loading}
-					/>
-				</div>
-				
-				<div class="form-control">
-					<label class="label" for="registerPassword">
-						<span class="label-text">Password</span>
-					</label>
-					<input 
-						id="registerPassword"
-						type="password" 
-						name="password" 
-						class="input input-bordered w-full" 
-						placeholder="••••••••" 
-						required
-						disabled={loading}
-					/>
-					<!-- <label class="label">
-						<span class="label-text-alt">Must be at least 8 characters</span>
-					</label> -->
-				</div>
-				
-				<div class="form-control">
-					<label class="label" for="confirmPassword">
-						<span class="label-text">Confirm Password</span>
-					</label>
-					<input 
-						id="confirmPassword"
-						name="confirmPassword"
-						type="password" 
-						class="input input-bordered w-full" 
-						placeholder="••••••••" 
-						required
-						disabled={loading}
-					/>
-				</div>
-				
-				<div class="form-control">
-					<label class="label cursor-pointer">
-						<span class="label-text">I agree to the Terms of Service and Privacy Policy</span>
-						<input type="checkbox" name="agreeTerms" class="checkbox checkbox-primary" disabled={loading} />
-					</label>
-				</div>
-				
-				<button type="submit" class="btn btn-secondary w-full" disabled={loading}>
-					{#if loading}
+			<form use:form class="space-y-2">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Name</legend>
+					<input type="text" name="name" class="input w-full" placeholder="Name" />
+					{#if $errors.name}<span class="text-error">{$errors.name}</span>{/if}
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Username</legend>
+					<input type="text" name="username" class="input w-full" placeholder="Username" />
+					{#if $errors.username}<span class="text-error">{$errors.username}</span>{/if}
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Email</legend>
+					<input type="text" name="email" class="input w-full" placeholder="Email" />
+					{#if $errors.email}<span class="text-error">{$errors.email}</span>{/if}
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Password</legend>
+					<input type="password" name="password" class="input w-full" placeholder="Password" />
+					{#if $errors.password}<span class="text-error">{$errors.password}</span>{/if}
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Password Confirm</legend>
+					<input type="password" name="passwordConfirm" class="input w-full" placeholder="Password" />
+					{#if $errors.passwordConfirm}<span class="text-error">{$errors.passwordConfirm}</span>{/if}
+				</fieldset>				
+				<button type="submit" class="btn btn-secondary w-full" disabled={$registerMutation.isPending}>
+					{#if $registerMutation.isPending}
 						<span class="loading loading-spinner loading-sm"></span>
 						Creating account...
 					{:else}

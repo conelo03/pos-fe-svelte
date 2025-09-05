@@ -2,20 +2,24 @@
   import ActionColumn from '$lib/components/dataDisplay/ActionColumn.svelte';
   import DataTable from '$lib/components/dataDisplay/DataTable.svelte';
   import ProductForm from '$lib/components/pages/product/ProductForm.svelte';
+  import UserForm from '$lib/components/pages/user/UserForm.svelte';
   import Toast from '$lib/components/ui/Toast.svelte';
-  import { createProduct, deleteProduct, getProducts, updateProduct } from '$lib/services/product.service.js';
+  import { createUser, deleteUser, getUsers, updateUser } from '$lib/services/user.service.js';
+  import { user } from '$lib/stores/auth.js';
   import type { ColumnType } from '$lib/types/global.type.js';
-  import type { ProductType } from '$lib/types/product.type.js';
+  import type { UserType } from '$lib/types/user.type.js';
   import { createMutation } from '@tanstack/svelte-query';
 	import { fade, scale } from "svelte/transition";
 
 	let refreshHash: number = $state(0)
 	const defaultValues = {
 		name: '',
-		description: '',
-		price: null
+		username: '',
+		email: '',
+		password: '',
+		role: '',
 	}
-	let selectedValues: ProductType = $state({
+	let selectedValues: UserType = $state({
 		...defaultValues
 	})
 	let disabled = $state(false)
@@ -24,12 +28,13 @@
 	let toastMessage = $state('')
 	let toastType = $state('info')
 
-	const columns: ColumnType<ProductType>[] = [
+	const columns: ColumnType<UserType>[] = [
     // { accessorKey: 'id', title: 'ID' },
     { accessorKey: 'name', title: 'Name' },
-    { accessorKey: 'description', title: 'Description' },
-    { accessorKey: 'price', title: 'Price' },
-    { title: 'Custom Column', cell: (row) => `${row.name} - ${row.price}` },
+    { accessorKey: 'username', title: 'Username' },
+    { accessorKey: 'email', title: 'Email' },
+    { accessorKey: 'role', title: 'Role' },
+    { title: 'Custom Column', cell: (row) => `${row.name} - ${row.email}` },
     {
       title: "Actions",
 			// cell: row => row.name
@@ -39,19 +44,19 @@
 					row, 
 					onView: () => (disabled = true, showModal = true, selectedValues = row), 
 					onEdit: () => (showModal = true, selectedValues = row), 
-					onDelete: () => $deleteData.mutate(row.id)
+					onDelete: $user?.id !== row.id ? () => $deleteData.mutate(row.id) : null
 				}
 			})
     }
   ]
 
   const deleteData = createMutation({
-    mutationFn: deleteProduct,
+    mutationFn: deleteUser,
     onSuccess: () => refreshHash = Math.random()
   })
 
   const createData = createMutation({
-    mutationFn: createProduct,
+    mutationFn: createUser,
     onSuccess: (data) => {
 			toastMessage = data?.message
 			toastType = 'success'
@@ -67,7 +72,7 @@
   })
 
   const updateData = createMutation({
-    mutationFn: updateProduct,
+    mutationFn: updateUser,
     onSuccess: (data) => {
 			toastMessage = data?.message
 			toastType = 'success'
@@ -86,7 +91,7 @@
 		showToast = false
 	}
 
-	const onSubmit = (values: ProductType) => {
+	const onSubmit = (values: UserType) => {
 		if (values?.id) {
 			$updateData.mutate({
 				id: values?.id,
@@ -101,24 +106,24 @@
 </script>
 
 <svelte:head>
-	<title>Product Management - Admin Template</title>
+	<title>User Management - Admin Template</title>
 </svelte:head>
 
 <div class="space-y-6">
 	<div class="flex justify-between items-center">
-		<h1 class="text-2xl font-bold">Product Management</h1>
+		<h1 class="text-2xl font-bold">User Management</h1>
 		<button class="btn btn-primary" onclick={() => (selectedValues = defaultValues, showModal = true)}>
 			<i class="fas fa-plus mr-2"></i>
-			Add Product
+			Add User
 		</button>
 	</div>
 	
 	<div class="card bg-base-100 shadow">
 		<div class="card-body">
 			<DataTable
-				key={'products'}
+				key={'users'}
 				columns={columns}
-				queryFn={getProducts}
+				queryFn={getUsers}
 				filter={{
 					// filter: [1000, 'pro', 'descrip'],
 					// filterBy: ['$gte(price)', '$ilike(name)', '$ilike(description)'],
@@ -134,8 +139,8 @@
 {#if showModal}
   <div class="modal modal-open" transition:fade>
     <div class="modal-box" transition:scale={{ duration: 800 }}>
-      <h3 class="font-bold text-lg mb-2">Product Form</h3>
-			<ProductForm
+      <h3 class="font-bold text-lg mb-2">User Form</h3>
+			<UserForm
 				defaultValues={selectedValues}
 				onSubmit={onSubmit}
 				onCancel={() => (showModal = false)}

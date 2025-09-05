@@ -2,13 +2,13 @@
 	import { page } from '$app/stores';
   import { user } from '$lib/stores/auth.js';
 	
-	const menuItems = [
+	const menuItems: any[] = [
 		{ href: '/dashboard', icon: 'fas fa-home', label: 'Dashboard' },
-		{ href: '/users', icon: 'fas fa-users', label: 'Users', badge: '12' },
+		{ href: '/users', icon: 'fas fa-users', label: 'Users' },
 		{ href: '/products', icon: 'fas fa-box', label: 'Products' },
-		{ href: '/orders', icon: 'fas fa-shopping-cart', label: 'Orders', badge: '3' },
-		{ href: '/analytics', icon: 'fas fa-chart-bar', label: 'Analytics' },
-		{ href: '/settings', icon: 'fas fa-cog', label: 'Settings' }
+		{ href: '/orders', icon: 'fas fa-shopping-cart', label: 'Orders' },
+		// { href: '/analytics', icon: 'fas fa-chart-bar', label: 'Analytics' },
+		// { href: '/settings', icon: 'fas fa-cog', label: 'Settings' }
 	];
 </script>
 
@@ -42,8 +42,8 @@
 					>
 						<i class={item.icon}></i>
 						{item.label}
-						{#if item.badge}
-							<span class="badge badge-sm badge-primary">{item.badge}</span>
+						{#if item?.badge}
+							<span class="badge badge-sm badge-primary">{item?.badge}</span>
 						{/if}
 					</a>
 				</li>
@@ -61,14 +61,14 @@
 					>
 						<i class={item.icon}></i>
 						{item.label}
-						{#if item.badge}
-							<span class="badge badge-sm {item.badge === '3' ? 'badge-warning' : 'badge-primary'}">{item.badge}</span>
+						{#if item?.badge}
+							<span class="badge badge-sm {item?.badge === '3' ? 'badge-warning' : 'badge-primary'}">{item?.badge}</span>
 						{/if}
 					</a>
 				</li>
 			{/each}
 			
-			<li class="menu-title">
+			<!-- <li class="menu-title">
 				<span>Tools</span>
 			</li>
 			
@@ -82,7 +82,7 @@
 						{item.label}
 					</a>
 				</li>
-			{/each}
+			{/each} -->
 		</ul>
 	</div>
 	

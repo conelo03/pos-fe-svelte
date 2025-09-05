@@ -2,7 +2,7 @@ import { stringify } from "query-string";
 import apiClient from "./apiClient.js";
 import type { ProductType } from "$lib/types/product.type.js";
 
-export const getProduts = async (params: any): Promise<any> => {
+export const getProducts = async (params: any): Promise<any> => {
   const res = await apiClient.get(`/products?${stringify(params)}`);
   return res.data;
 };
