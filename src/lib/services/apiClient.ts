@@ -1,10 +1,11 @@
 import { token, user } from "$lib/stores/auth.js";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { get } from "svelte/store";
+import { env } from "$env/dynamic/public";
 
 const sharedToken = localStorage.getItem("token");
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = env.PUBLIC_API_URL;
 
 const apiClient = axios.create({
   baseURL: API_URL,
