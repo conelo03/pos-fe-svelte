@@ -7,6 +7,10 @@ const config = {
 		adapter: adapter({
 			fallback: 'index.html' // may differ from host to host
 		}),
+    ssr: false,
+    prerender: {
+      entries: []
+    }
 	}
 };
 
