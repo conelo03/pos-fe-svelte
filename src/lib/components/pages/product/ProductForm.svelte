@@ -3,6 +3,9 @@
   import { validator } from '@felte/validator-yup';
   import { createForm } from 'felte';
   import * as yup from 'yup';
+  import { env } from "$env/dynamic/public";
+
+  const APP_URL = env.PUBLIC_APP_URL;
 
   let { 
     defaultValues = {},
@@ -44,6 +47,12 @@
     <legend class="fieldset-legend">Price</legend>
     <input type="number" name="price" class="input w-full" />
     {#if $errors.price}<span class="text-error">{$errors.price}</span>{/if}
+  </fieldset>
+  <fieldset class="fieldset">
+    <legend class="fieldset-legend">Image</legend>
+    {#if defaultValues?.image}<img src={`${APP_URL}${defaultValues?.image}`} alt={defaultValues?.image} />{/if}
+    <input type="file" name="file" class="file-input file-input-bordered w-full" accept="image/*" />
+    {#if $errors.file}<span class="text-error">{$errors.file}</span>{/if}
   </fieldset>
   <div class="flex justify-end gap-2">
     <button type="button" class="btn" onclick={() => onCancel()}>Cancel</button>

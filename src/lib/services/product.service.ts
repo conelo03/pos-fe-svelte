@@ -13,12 +13,30 @@ export const getProduct = async (id: string): Promise<any> => {
 };
 
 export const createProduct = async (body: ProductType): Promise<any> => {
-  const res = await apiClient.post(`/products`, { ...body });
+  const formData = new FormData();
+  formData.append("file", body?.file);
+  formData.append("name", body?.name);
+  formData.append("description", body?.description);
+  formData.append("price", String(body?.price ?? ""));
+  const res = await apiClient.post(`/products`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 
 export const updateProduct = async (body: ProductType): Promise<any> => {
-  const res = await apiClient.put(`/products/${body.id}`, { ...body });
+  const formData = new FormData();
+  formData.append("file", body?.file);
+  formData.append("name", body?.name);
+  formData.append("description", body?.description);
+  formData.append("price", String(body?.price ?? ""));
+  const res = await apiClient.put(`/products/${body.id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 

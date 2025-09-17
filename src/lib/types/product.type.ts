@@ -3,6 +3,8 @@ export interface ProductType {
   name: string;
   description: string;
   price: number | null;
+  image?: string;
+  file?: any;
   createdBy?: string;
   createdAt?: string;
   updatedBy?: string;
